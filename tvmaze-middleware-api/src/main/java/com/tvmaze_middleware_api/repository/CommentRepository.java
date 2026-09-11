@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface CommentRepository extends MongoRepository<Comment, String> {
 
+    List<Comment> findByShowId(Long showId);
+
     @Aggregation(pipeline = {
             "{ '$match': { 'showId': { '$in': ?0 } } }",
             "{ '$group': { '_id': '$showId', 'comments': { '$push': { 'comment': '$comment', 'rating': '$rating' } } } }"
