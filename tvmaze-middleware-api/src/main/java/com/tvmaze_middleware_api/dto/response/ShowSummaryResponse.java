@@ -7,6 +7,7 @@ public record ShowSummaryResponse(
         String name,
         String channel,
         String summary,
-        List<String> genres
+        List<String> genres,
+        List<CommentSummary> comments
 ) {
 }
