@@ -1,5 +1,7 @@
 package com.tvmaze_middleware_api.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -7,6 +9,7 @@ import org.springframework.web.client.RestClientException;
 
 import com.tvmaze_middleware_api.dto.tvmaze.TvMazeShow;
 import com.tvmaze_middleware_api.exceptions.ShowNotFound;
+import com.tvmaze_middleware_api.repository.ShowRepository;
 import com.tvmaze_middleware_api.service.ShowService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,11 +21,18 @@ import lombok.extern.slf4j.Slf4j;
 public class ShowServiceImpl implements ShowService {
 
 	private final RestClient restClient;
+	private final ShowRepository showRepository;
 	
 	@Override
 	public TvMazeShow getShowById(Long showId) {
 		
-		return restClient.get()
+		Optional<TvMazeShow> showOptional = showRepository.findById(showId);
+		
+		if (showOptional.isPresent()) {
+			return showOptional.get();
+		}
+		
+		TvMazeShow show = restClient.get()
 				.uri("/shows/{id}", showId)
 				.retrieve()
 				.onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
@@ -34,6 +44,8 @@ public class ShowServiceImpl implements ShowService {
 					throw new RestClientException("TVmaze service not available");
 				})
 				.body(TvMazeShow.class);
+		
+		return showRepository.save(show);
 	
 	}
 
