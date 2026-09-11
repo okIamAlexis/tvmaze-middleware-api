@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import java.time.Instant;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -49,6 +51,6 @@ public class ShowCacheResolver {
                 })
                 .body(TvMazeShow.class);
 
-        return showRepository.save(show);
+        return showRepository.save(show.withCachedAt(Instant.now()));
     }
 }
