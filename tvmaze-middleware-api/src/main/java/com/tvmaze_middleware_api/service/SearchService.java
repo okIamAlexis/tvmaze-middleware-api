@@ -4,7 +4,7 @@ import com.tvmaze_middleware_api.dto.response.ShowSummaryResponse;
 
 import java.util.List;
 
-public interface ShowSearchService {
+public interface SearchService {
 
     List<ShowSummaryResponse> searchShows(String query);
 }

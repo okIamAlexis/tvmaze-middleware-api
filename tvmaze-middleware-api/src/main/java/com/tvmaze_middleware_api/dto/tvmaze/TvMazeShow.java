@@ -7,10 +7,24 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record TvMazeShow(
         Long id,
+        String url,
         String name,
-        String summary,
+        String type,
+        String language,
         List<String> genres,
+        String status,
+        Integer runtime,
+        Integer averageRuntime,
+        String premiered,
+        String ended,
+        String officialSite,
+        TvMazeSchedule schedule,
+        TvMazeRating rating,
+        Integer weight,
         TvMazeChannel network,
-        TvMazeChannel webChannel
+        TvMazeChannel webChannel,
+        TvMazeImage image,
+        String summary,
+        Long updated
 ) {
 }

@@ -1,7 +1,6 @@
 package com.tvmaze_middleware_api.service.impl;
 
 import java.util.List;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -11,15 +10,14 @@ import com.tvmaze_middleware_api.dto.response.ShowSummaryResponse;
 import com.tvmaze_middleware_api.dto.tvmaze.TvMazeSearchResult;
 import com.tvmaze_middleware_api.dto.tvmaze.TvMazeShow;
 import com.tvmaze_middleware_api.exceptions.ShowNotFound;
-import com.tvmaze_middleware_api.service.ShowSearchService;
-
+import com.tvmaze_middleware_api.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ShowSearchServiceImpl implements ShowSearchService {
+public class SearchServiceImpl implements SearchService {
 	
 	private final RestClient restClient;
 	
@@ -39,7 +37,7 @@ public class ShowSearchServiceImpl implements ShowSearchService {
 				})
 				.onStatus(HttpStatusCode :: is5xxServerError, (request, response) -> {
 					log.error("Server error occurred while searching for shows with query: {}", query);
-					throw new RestClientException("Server error occurred while searching for shows");
+					throw new RestClientException("TVmaze service not available");
 				})
 				.body(new ParameterizedTypeReference<List<TvMazeSearchResult>>() {});
 		 
