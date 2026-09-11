@@ -1,15 +1,14 @@
 package com.tvmaze_middleware_api.service.impl;
 
-import java.util.Optional;
+import java.util.List;
 
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 
+import com.tvmaze_middleware_api.cache.ShowCacheResolver;
+import com.tvmaze_middleware_api.dto.response.CommentSummary;
 import com.tvmaze_middleware_api.dto.tvmaze.TvMazeShow;
-import com.tvmaze_middleware_api.exceptions.ShowNotFound;
-import com.tvmaze_middleware_api.repository.ShowRepository;
+import com.tvmaze_middleware_api.model.Comment;
+import com.tvmaze_middleware_api.repository.CommentRepository;
 import com.tvmaze_middleware_api.service.ShowService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,33 +19,24 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ShowServiceImpl implements ShowService {
 
-	private final RestClient restClient;
-	private final ShowRepository showRepository;
-	
+	private final ShowCacheResolver showCacheResolver;
+	private final CommentRepository commentRepository;
+
 	@Override
 	public TvMazeShow getShowById(Long showId) {
-		
-		Optional<TvMazeShow> showOptional = showRepository.findById(showId);
-		
-		if (showOptional.isPresent()) {
-			return showOptional.get();
-		}
-		
-		TvMazeShow show = restClient.get()
-				.uri("/shows/{id}", showId)
-				.retrieve()
-				.onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
-					log.error("Client error occurred while fetching show with ID: {}", showId);
-					throw new ShowNotFound("Show not found for ID: " + showId);
-				})
-				.onStatus(HttpStatusCode::is5xxServerError, (request, response) -> {
-					log.error("Server error occurred while fetching show with ID: {}", showId);
-					throw new RestClientException("TVmaze service not available");
-				})
-				.body(TvMazeShow.class);
-		
-		return showRepository.save(show);
-	
+
+		TvMazeShow show = showCacheResolver.resolveShow(showId);
+
+		log.info("Found show with ID: {} in cache or database, now fetching comments", showId);
+		List<CommentSummary> comments = commentRepository.findByShowId(showId).stream()
+				.map(this::toCommentSummary)
+				.toList();
+
+		return show.withComments(comments);
+	}
+
+	private CommentSummary toCommentSummary(Comment comment) {
+		return new CommentSummary(comment.comment(), comment.rating());
 	}
 
 }
